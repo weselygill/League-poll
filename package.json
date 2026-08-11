@@ -1,0 +1,8 @@
+{
+  "name": "family-league-poll",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@netlify/blobs": "*"
+  }
+}
