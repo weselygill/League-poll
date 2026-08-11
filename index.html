@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Family League 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TOKENS
+   ============================================================ */
+:root{
+  --ink:#0B120E; --surface:#121D16; --surface-hi:#17281D; --line:#31493B;
+  --amber:#F0B44C; --amber-dim:#A87E2C; --cream:#F3EEE1; --sage:#A3B5AA;
+  --faint:#7F918A; --rust:#E08A66;
+  --display:'Oswald',sans-serif; --body:'DM Sans',system-ui,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--ink)}
+body{
+  font-family:var(--body); color:var(--cream);
+  padding:26px 18px calc(64px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing:antialiased; -webkit-text-size-adjust:100%;
+}
+.shell{max-width:560px;margin:0 auto}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+
+/* ============================================================
+   MASTHEAD
+   ============================================================ */
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.24em;color:var(--amber);text-transform:uppercase;margin:0 0 10px}
+.display{font-family:var(--display);font-weight:700;font-size:clamp(38px,12vw,60px);line-height:.92;margin:0;text-transform:uppercase}
+.sub{color:var(--sage);font-size:14px;line-height:1.5;margin:12px 0 0}
+.rule{height:1px;background:var(--line);border:0;margin:26px 0}
+
+/* ============================================================
+   SHARED PIECES
+   ============================================================ */
+.block{margin-bottom:32px}
+.qnum{font-family:var(--mono);font-size:11.5px;letter-spacing:.2em;color:var(--sage);text-transform:uppercase}
+.qtitle{font-family:var(--display);font-weight:600;text-transform:uppercase;font-size:20px;letter-spacing:.04em;margin:6px 0 4px}
+.qhint{color:var(--sage);font-size:13px;margin:0 0 16px;line-height:1.5}
+.empty{font-family:var(--mono);font-size:11px;color:var(--faint);line-height:1.6}
+
+.field{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  padding:15px 16px;color:var(--cream);font-family:var(--body);font-size:17px}
+.field::placeholder{color:var(--faint)}
+
+.notice{border:1px dashed var(--rust);border-radius:10px;padding:12px 14px;color:var(--rust);font-size:13px;margin-bottom:16px}
+.notice[hidden]{display:none}
+
+.primary{width:100%;background:var(--amber);border:0;border-radius:12px;padding:18px;color:var(--ink);
+  cursor:pointer;font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:.08em;text-transform:uppercase}
+.primary:disabled{background:var(--surface);color:var(--faint);cursor:not-allowed}
+.ghost{width:100%;background:none;border:1px solid var(--line);border-radius:12px;padding:14px;
+  color:var(--sage);cursor:pointer;font-size:14px;margin-top:10px}
+.ghost:hover{color:var(--cream);border-color:var(--amber-dim)}
+
+/* ============================================================
+   FORM — progress
+   ============================================================ */
+.steps{display:flex;gap:6px;align-items:center;margin-bottom:24px}
+.step{height:3px;flex:1;background:var(--line);border-radius:2px;transition:background .25s ease}
+.step.done{background:var(--amber)}
+.stepnum{font-family:var(--mono);font-size:11.5px;color:var(--sage);letter-spacing:.14em;margin-left:4px}
+
+/* ============================================================
+   FORM — inputs
+   ============================================================ */
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.big{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px 12px;
+  cursor:pointer;font-family:var(--display);font-weight:600;font-size:19px;letter-spacing:.06em;
+  text-transform:uppercase;transition:background .14s,border-color .14s,color .14s}
+.big:hover{background:var(--surface-hi)}
+.big[aria-pressed="true"][data-v="in"]{background:var(--amber);border-color:var(--amber);color:var(--ink)}
+.big[aria-pressed="true"][data-v="out"]{background:var(--surface-hi);border-color:var(--rust);color:var(--rust)}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:11px 20px;
+  cursor:pointer;font-family:var(--mono);font-size:14px;font-weight:700;
+  transition:background .14s,border-color .14s,color .14s}
+.chip:hover{background:var(--surface-hi)}
+.chip[aria-pressed="true"]{background:var(--amber);border-color:var(--amber);color:var(--ink)}
+
+.slotrow{display:grid;grid-template-columns:1fr 74px 74px;gap:8px;align-items:center;margin-bottom:8px}
+.slotday{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.dow{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;color:var(--sage)}
+.date{font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:.03em}
+.daynote{font-family:var(--mono);font-size:11px;color:var(--rust);letter-spacing:.06em}
+.timehead{font-family:var(--mono);font-size:11.5px;color:var(--sage);letter-spacing:.12em;text-align:center;padding-bottom:4px}
+.cell{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:15px 0;
+  cursor:pointer;color:var(--sage);font-family:var(--mono);font-size:14px;font-weight:700;
+  transition:background .14s,border-color .14s,color .14s}
+.cell:hover{border-color:var(--amber-dim)}
+.cell[aria-pressed="true"]{background:var(--amber);border-color:var(--amber);color:var(--ink)}
+
+/* ============================================================
+   LIVE STRIP
+   ============================================================ */
+.live{border-top:1px solid var(--line);margin-top:16px;padding-top:13px}
+.livehead{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--amber);
+  text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:7px}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--amber);animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.liveline{font-family:var(--mono);font-size:12px;color:var(--sage);line-height:1.9}
+.livekey{color:var(--cream)}
+.livetop{color:var(--amber)}
+
+/* ============================================================
+   BOARD — verdict
+   ============================================================ */
+.verdict{background:var(--surface-hi);border:1px solid var(--amber-dim);border-radius:14px;padding:20px;margin-bottom:28px}
+.verdictlabel{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--amber);text-transform:uppercase}
+.verdictslot{font-family:var(--display);font-weight:700;font-size:clamp(24px,7vw,32px);
+  text-transform:uppercase;letter-spacing:.02em;margin:8px 0 6px;line-height:1.05}
+.verdictmeta{font-family:var(--mono);font-size:12px;color:var(--sage)}
+
+/* ============================================================
+   BOARD — tabs
+   ============================================================ */
+.tabs{display:flex;gap:22px;border-bottom:1px solid var(--line);margin-bottom:26px}
+.tab{background:none;border:0;padding:0 0 12px;cursor:pointer;font-family:var(--display);
+  font-weight:600;font-size:16px;letter-spacing:.06em;text-transform:uppercase;color:var(--sage);
+  border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab[aria-selected="true"]{color:var(--cream);border-bottom-color:var(--amber)}
+.tabcount{font-family:var(--mono);font-size:11.5px;color:var(--faint);margin-left:5px}
+
+/* ============================================================
+   BOARD — tallies
+   ============================================================ */
+.tally{display:flex;align-items:center;gap:12px;margin-bottom:9px}
+.tallykey{font-family:var(--mono);font-size:13px;font-weight:700;width:46px;flex:none}
+.track{flex:1;height:7px;background:var(--surface);border-radius:4px;overflow:hidden}
+.fill{height:100%;background:var(--amber);border-radius:4px;transition:width .4s ease}
+.tallynum{font-family:var(--mono);font-size:12px;color:var(--sage);width:20px;text-align:right;flex:none}
+
+.person{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px 0;border-bottom:1px solid var(--line)}
+.pmeta{font-family:var(--mono);font-size:11px;color:var(--sage)}
+.pmeta.out{color:var(--rust)}
+
+.detail{background:var(--surface);border:1px solid var(--line);border-radius:10px;
+  padding:13px 15px;margin-top:12px;font-size:13px;line-height:1.6}
+.detailhead{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;color:var(--amber);
+  text-transform:uppercase;margin-bottom:6px}
+
+/* ============================================================
+   BOARD — chat
+   ============================================================ */
+.msg{display:flex;gap:11px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line)}
+.msgbody{flex:1;min-width:0}
+.msghead{display:flex;align-items:baseline;gap:9px;margin-bottom:3px}
+.msgwho{font-family:var(--display);font-weight:600;font-size:14px;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--amber)}
+.msgtime{font-family:var(--mono);font-size:11.5px;color:var(--faint)}
+.msgtext{font-size:15px;line-height:1.5;overflow-wrap:anywhere}
+.msgkill{background:none;border:0;color:#3C4B43;cursor:pointer;font-size:17px;line-height:1;padding:2px 4px;flex:none}
+.msgkill:hover{color:var(--rust)}
+.composer{display:flex;gap:8px;margin-top:16px}
+.composer .field{flex:1;padding:13px 14px;font-size:15px;min-width:0}
+.send{background:var(--amber);border:0;border-radius:12px;padding:0 20px;color:var(--ink);cursor:pointer;
+  flex:none;font-family:var(--display);font-weight:700;font-size:14px;letter-spacing:.07em;text-transform:uppercase}
+.send:disabled{background:var(--surface);color:var(--faint);cursor:not-allowed}
+.count{font-family:var(--mono);font-size:11.5px;color:var(--faint);text-align:right;margin-top:7px}
+
+.foot{font-family:var(--mono);font-size:11.5px;color:var(--faint);letter-spacing:.06em;line-height:1.8;margin-top:28px}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <p class="eyebrow">Family League · 2026</p>
+  <h1 class="display" id="hd"></h1>
+  <p class="sub" id="hdsub"></p>
+  <hr class="rule">
+  <div id="app"></div>
+  <p class="foot">
+    Everyone with this link sees every answer and every message, names included.<br>
+    Answers save as you send them. Come back to this link to change yours.
+  </p>
+</div>
+
+<script>
+/* ============================================================
+   1. CONFIG — edit these
+   ============================================================ */
+var DAYS = [
+  {id:'aug16', dow:'SUN', date:'AUG 16'},
+  {id:'aug17', dow:'MON', date:'AUG 17'},
+  {id:'aug18', dow:'TUE', date:'AUG 18'},
+  {id:'aug31', dow:'MON', date:'AUG 31'},
+  {id:'sep1',  dow:'TUE', date:'SEP 1'},
+  {id:'sep6',  dow:'SUN', date:'SEP 6'},
+  {id:'sep7',  dow:'MON', date:'SEP 7', note:'Labor Day'},
+  {id:'sep8',  dow:'TUE', date:'SEP 8'}
+];
+var TIMES  = [{id:'6', label:'6:00'}, {id:'7', label:'7:00'}];
+var BUYINS = ['Free','$5','$10','$15','$25'];
+var CHAT_CAP = 120;
+var POLL_MS  = 20000;
+
+/* ============================================================
+   2. STORAGE ADAPTER — Netlify
+   Talks to /api/poll, backed by Netlify Blobs. The personal
+   "claim" stays on this device in localStorage.
+   ============================================================ */
+var API = '/api/poll';
+
+async function fetchAll(){
+  var r = await fetch(API, {cache:'no-store'});
+  if(!r.ok) throw new Error('load failed');
+  return r.json();
+}
+async function send(payload){
+  var r = await fetch(API, {
+    method:'POST',
+    headers:{'content-type':'application/json'},
+    body:JSON.stringify(payload)
+  });
+  if(!r.ok) throw new Error('save failed');
+  return r.json();
+}
+function readMine(){
+  try{ return JSON.parse(localStorage.getItem('ff2026:me') || 'null'); }catch(e){ return null; }
+}
+function writeMine(v){ try{ localStorage.setItem('ff2026:me', JSON.stringify(v)); }catch(e){} }
+function clearMine(){ try{ localStorage.removeItem('ff2026:me'); }catch(e){} }
+
+/* ============================================================
+   3. STATE
+   ============================================================ */
+var S = {
+  view:'form', tab:'stand', loading:true, saving:false, posting:false,
+  votes:[], chat:[], claim:null, err:'',
+  name:'', status:null, buyIn:null, slots:[], draft:'', openCell:null
+};
+
+/* ============================================================
+   4. HELPERS
+   ============================================================ */
+function norm(s){ return (s||'').trim().replace(/\s+/g,' ').toLowerCase(); }
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function ago(t){
+  var s = Math.floor((Date.now()-t)/1000);
+  if(s<60) return 'now';
+  if(s<3600) return Math.floor(s/60)+'m';
+  if(s<86400) return Math.floor(s/3600)+'h';
+  return Math.floor(s/86400)+'d';
+}
+function ins(){ return S.votes.filter(function(v){ return v.status==='in'; }); }
+function outs(){ return S.votes.filter(function(v){ return v.status==='out'; }); }
+function slotCount(id){ return ins().filter(function(v){ return v.slots.indexOf(id)>-1; }).length; }
+function slotNames(id){ return ins().filter(function(v){ return v.slots.indexOf(id)>-1; }).map(function(v){ return v.name; }); }
+function buyCount(b){ return ins().filter(function(v){ return v.buyIn===b; }).length; }
+function allSlots(){
+  var out=[];
+  DAYS.forEach(function(d){ TIMES.forEach(function(t){
+    out.push({id:d.id+'-'+t.id, label:d.dow+' '+d.date+' · '+t.label, n:slotCount(d.id+'-'+t.id)});
+  });});
+  return out;
+}
+function peakSlot(){ return Math.max(1, Math.max.apply(null, allSlots().map(function(s){return s.n;}))); }
+function peakBuy(){ return Math.max(1, Math.max.apply(null, BUYINS.map(buyCount))); }
+function slotLabel(id){
+  var p=id.split('-'), d=DAYS.filter(function(x){return x.id===p[0];})[0],
+      t=TIMES.filter(function(x){return x.id===p[1];})[0];
+  return d ? d.dow+' '+d.date+' · '+t.label : id;
+}
+function nameTaken(){
+  if(S.claim) return false;
+  var n = norm(S.name);
+  return n.length>1 && S.votes.some(function(v){ return norm(v.name)===n; });
+}
+function canSubmit(){
+  return S.name.trim().length>1 && !nameTaken() && S.status!==null &&
+    (S.status==='out' || (S.buyIn!==null && S.slots.length>0));
+}
+function stepsDone(){
+  var n=0;
+  if(S.name.trim().length>1) n++;
+  if(S.status!==null) n++;
+  if(S.status==='out' || (S.buyIn!==null && S.slots.length>0)) n++;
+  return n;
+}
+
+/* ============================================================
+   5. DATA
+   ============================================================ */
+async function pull(){
+  try{
+    var d = await fetchAll();
+    S.votes = d.votes || []; S.chat = d.chat || [];
+  }catch(e){ S.err = "Couldn't reach the server. Retrying."; }
+}
+function boot(){
+  pull().then(function(){
+    var mine = readMine();
+    if(mine && mine.name){
+      S.claim = mine.name; S.name = mine.name;
+      var prior = S.votes.filter(function(v){ return norm(v.name)===norm(mine.name); })[0];
+      if(prior){ S.status=prior.status; S.buyIn=prior.buyIn; S.slots=prior.slots||[]; S.view='board'; }
+    }
+    S.loading=false; render();
+    setInterval(function(){
+      pull().then(function(){ if(!S.saving && !S.posting) render(); });
+    }, POLL_MS);
+  });
+}
+async function submit(){
+  S.saving=true; S.err=''; render();
+  try{
+    var d = await send({type:'vote', name:S.name.trim(), status:S.status,
+                        buyIn:S.buyIn, slots:S.slots});
+    S.votes = d.votes; S.chat = d.chat;
+    writeMine({name:S.name.trim()});
+    S.claim = S.name.trim(); S.view='board'; S.tab='stand';
+  }catch(e){ S.err = "That didn't save. Check your connection and try again."; }
+  S.saving=false; render();
+}
+async function post(){
+  var text=S.draft.trim(), who=(S.claim||S.name).trim();
+  if(!text || !who) return;
+  S.posting=true; S.err=''; render();
+  try{
+    var d = await send({type:'chat', who:who, text:text});
+    S.chat = d.chat; S.draft='';
+  }catch(e){ S.err="That didn't send. Try again in a second."; }
+  S.posting=false; render();
+}
+async function kill(id){
+  try{
+    var d = await send({type:'delete', id:id, who:S.claim});
+    S.chat = d.chat; render();
+  }catch(e){ S.err="Couldn't delete that."; render(); }
+}
+function release(){
+  clearMine();
+  S.claim=null; S.name=''; S.status=null; S.buyIn=null; S.slots=[]; S.view='form';
+  render();
+}
+
+/* ============================================================
+   6. VIEWS
+   ============================================================ */
+function viewForm(){
+  var h='';
+  h+='<div class="steps">';
+  for(var i=0;i<3;i++) h+='<span class="step'+(i<stepsDone()?' done':'')+'"></span>';
+  h+='<span class="stepnum">'+stepsDone()+'/3</span></div>';
+
+  h+='<div class="notice"'+(S.err?'':' hidden')+'>'+esc(S.err)+'</div>';
+
+  /* name */
+  h+='<div class="block"><span class="qnum">Start here</span><h2 class="qtitle">Your name</h2>';
+  if(S.claim){
+    h+='<p class="qhint">You already answered. Sending again overwrites it.</p>';
+    h+='<div class="detail" style="display:flex;justify-content:space-between;align-items:center;gap:12px">';
+    h+='<span class="date">'+esc(S.claim)+'</span>';
+    h+='<button class="msgkill" data-act="release" style="font-size:12px;text-decoration:underline">Not you?</button></div>';
+  }else{
+    h+='<p class="qhint">One entry each. Come back with the same name to change yours.</p>';
+    h+='<input class="field" id="nm" value="'+esc(S.name)+'" placeholder="First and last" aria-label="Your name">';
+    if(nameTaken()) h+='<p class="qhint" style="margin-top:10px;color:var(--rust)">'+esc(S.name.trim())+' has already answered.</p>';
+  }
+  h+='</div>';
+
+  /* in / out */
+  h+='<div class="block"><span class="qnum">Question 01</span><h2 class="qtitle">In for this season?</h2>';
+  h+='<p class="qhint">Say no and you\'re done — the rest is skipped.</p><div class="pair">';
+  h+='<button class="big" data-act="status" data-v="in" aria-pressed="'+(S.status==='in')+'">I\'m in</button>';
+  h+='<button class="big" data-act="status" data-v="out" aria-pressed="'+(S.status==='out')+'">Sitting out</button>';
+  h+='</div></div>';
+
+  if(S.status==='in'){
+    /* buy-in */
+    h+='<div class="block"><span class="qnum">Question 02</span><h2 class="qtitle">Buy-in</h2>';
+    h+='<p class="qhint">Pick what you\'d actually pay. Majority wins.</p><div class="chips">';
+    BUYINS.forEach(function(b){
+      h+='<button class="chip" data-act="buy" data-v="'+esc(b)+'" aria-pressed="'+(S.buyIn===b)+'">'+esc(b)+'</button>';
+    });
+    h+='</div>';
+    if(S.buyIn!==null){
+      h+='<div class="live"><div class="livehead"><span class="dot"></span>Live · '+ins().length+' in</div><div class="liveline">';
+      BUYINS.forEach(function(b,i){
+        var n=buyCount(b), top=n>0&&n===peakBuy();
+        h+=(i?'<span>  ·  </span>':'')+'<span class="'+(top?'livetop':'livekey')+'">'+esc(b)+'</span> '+n;
+      });
+      h+='</div></div>';
+    }
+    h+='</div>';
+
+    /* dates */
+    h+='<div class="block"><span class="qnum">Question 03</span><h2 class="qtitle">Draft night</h2>';
+    h+='<p class="qhint">Tap every slot that works, not just your favorite. All times Central.</p>';
+    h+='<div class="slotrow"><span></span>';
+    TIMES.forEach(function(t){ h+='<div class="timehead">'+t.label+'</div>'; });
+    h+='</div>';
+    DAYS.forEach(function(d){
+      h+='<div class="slotrow"><span class="slotday"><span class="dow">'+d.dow+'</span><span class="date">'+d.date+'</span>';
+      if(d.note) h+='<span class="daynote">'+d.note+'</span>';
+      h+='</span>';
+      TIMES.forEach(function(t){
+        var id=d.id+'-'+t.id, on=S.slots.indexOf(id)>-1;
+        h+='<button class="cell" data-act="slot" data-v="'+id+'" aria-pressed="'+on+'" '+
+           'aria-label="'+d.dow+' '+d.date+' at '+t.label+'">'+(on?'✓':'—')+'</button>';
+      });
+      h+='</div>';
+    });
+    h+='<div class="live"><div class="livehead"><span class="dot"></span>Live · leading slots</div>';
+    var lead = allSlots().filter(function(s){return s.n>0;}).sort(function(a,b){return b.n-a.n;}).slice(0,3);
+    if(!lead.length){ h+='<div class="empty">No answers yet. First pick sets the pace.</div>'; }
+    else{
+      h+='<div class="liveline">';
+      lead.forEach(function(s,i){
+        h+='<div><span class="'+(i?'livekey':'livetop')+'">'+esc(s.label)+'</span> — '+s.n+' free</div>';
+      });
+      h+='</div>';
+    }
+    h+='</div></div>';
+  }
+
+  h+='<button class="primary" id="go"'+(canSubmit()&&!S.saving?'':' disabled')+'>'+
+     (S.saving?'Sending…':'Lock in my answers')+'</button>';
+  if(!canSubmit()){
+    var why = S.name.trim().length<2 ? 'Add your name to continue.'
+      : nameTaken() ? 'That name has already answered.'
+      : S.status===null ? 'Pick in or out.'
+      : S.buyIn===null ? 'Pick a buy-in.' : 'Pick at least one draft slot.';
+    h+='<p class="qhint" style="margin-top:10px;text-align:center">'+why+'</p>';
+  }
+  h+='<button class="ghost" data-act="toboard">See what everyone else said</button>';
+  return h;
+}
+
+function viewBoard(){
+  var h='', I=ins(), O=outs();
+
+  /* verdict */
+  var best = allSlots().sort(function(a,b){return b.n-a.n;})[0];
+  h+='<div class="verdict">';
+  if(!I.length || !best || !best.n){
+    h+='<div class="verdictlabel">Draft night</div><div class="verdictslot">Nothing yet</div>'+
+       '<div class="verdictmeta">Answers will pick this for you.</div>';
+  }else{
+    var tied = allSlots().filter(function(s){ return s.n===best.n; });
+    h+='<div class="verdictlabel">'+(tied.length>1?'Tied for the lead':'Leading right now')+'</div>';
+    h+='<div class="verdictslot">'+esc(tied.length>1?tied.map(function(s){return s.label;}).join('  /  '):best.label)+'</div>';
+    h+='<div class="verdictmeta">'+best.n+' of '+I.length+' free · buy-in leader '+
+       esc(BUYINS.filter(function(b){return buyCount(b)===peakBuy();})[0]||'—')+'</div>';
+  }
+  h+='</div>';
+
+  /* tabs */
+  h+='<div class="tabs" role="tablist">';
+  h+='<button class="tab" role="tab" data-act="tab" data-v="stand" aria-selected="'+(S.tab==='stand')+'">The board</button>';
+  h+='<button class="tab" role="tab" data-act="tab" data-v="talk" aria-selected="'+(S.tab==='talk')+
+     '">Trash talk<span class="tabcount">'+S.chat.length+'</span></button></div>';
+
+  h+='<div class="notice"'+(S.err?'':' hidden')+'>'+esc(S.err)+'</div>';
+
+  if(S.tab==='stand'){
+    if(I.length){
+      /* availability */
+      h+='<div class="block"><span class="qnum">Availability</span><h2 class="qtitle">Every slot</h2>';
+      h+='<p class="qhint">Brighter means more people free. Tap for names.</p>';
+      h+='<div class="slotrow"><span></span>';
+      TIMES.forEach(function(t){ h+='<div class="timehead">'+t.label+'</div>'; });
+      h+='</div>';
+      DAYS.forEach(function(d){
+        h+='<div class="slotrow"><span class="slotday"><span class="dow">'+d.dow+'</span><span class="date">'+d.date+'</span>';
+        if(d.note) h+='<span class="daynote">'+d.note+'</span>';
+        h+='</span>';
+        TIMES.forEach(function(t){
+          var id=d.id+'-'+t.id, n=slotCount(id), st='';
+          if(n){ var a=0.16+0.84*(n/peakSlot());
+            st=' style="background:rgba(240,180,76,'+a+');border-color:rgba(240,180,76,'+Math.min(1,a+.25)+
+               ');color:'+(a>0.55?'#0B120E':'#F3EEE1')+'"'; }
+          h+='<button class="cell" data-act="peek" data-v="'+id+'"'+st+
+             ' aria-label="'+d.dow+' '+d.date+' '+t.label+': '+n+' free">'+(n||'·')+'</button>';
+        });
+        h+='</div>';
+      });
+      if(S.openCell){
+        h+='<div class="detail"><div class="detailhead">'+esc(slotLabel(S.openCell))+'</div>';
+        var nm=slotNames(S.openCell);
+        h+= nm.length ? esc(nm.join(', ')) : 'Nobody has this one open.';
+        h+='</div>';
+      }
+      h+='</div>';
+
+      /* buy-in */
+      h+='<div class="block"><span class="qnum">Buy-in</span><h2 class="qtitle">The pot</h2><div style="margin-top:14px">';
+      BUYINS.forEach(function(b){
+        h+='<div class="tally"><span class="tallykey">'+esc(b)+'</span><span class="track">'+
+           '<span class="fill" style="width:'+(buyCount(b)/peakBuy()*100)+'%"></span></span>'+
+           '<span class="tallynum">'+buyCount(b)+'</span></div>';
+      });
+      h+='</div></div>';
+    }
+
+    /* roster */
+    h+='<div class="block"><span class="qnum">Answered</span><h2 class="qtitle">Who\'s replied</h2>';
+    if(!S.votes.length){ h+='<p class="empty">Nobody yet. You\'re first.</p>'; }
+    else{
+      h+='<div style="margin-top:10px">';
+      I.concat(O).forEach(function(v){
+        h+='<div class="person"><span>'+esc(v.name)+'</span><span class="pmeta'+(v.status==='out'?' out':'')+'">'+
+           (v.status==='out' ? 'SITTING OUT'
+             : esc(v.buyIn)+' · '+v.slots.length+' slot'+(v.slots.length===1?'':'s'))+'</span></div>';
+      });
+      h+='</div>';
+    }
+    h+='</div>';
+  }
+
+  if(S.tab==='talk'){
+    h+='<div class="block"><p class="qhint">Everyone with the link reads this. Act accordingly, or don\'t.</p>';
+    if(!S.chat.length){ h+='<p class="empty" style="padding:10px 0">Dead silence. Somebody start something.</p>'; }
+    else{
+      S.chat.slice().reverse().forEach(function(m){
+        h+='<div class="msg"><div class="msgbody"><div class="msghead">'+
+           '<span class="msgwho">'+esc(m.who)+'</span><span class="msgtime">'+ago(m.at)+'</span></div>'+
+           '<div class="msgtext">'+esc(m.text)+'</div></div>';
+        if(S.claim && norm(m.who)===norm(S.claim))
+          h+='<button class="msgkill" data-act="kill" data-v="'+m.id+'" aria-label="Delete">×</button>';
+        h+='</div>';
+      });
+    }
+    if(S.claim){
+      h+='<div class="composer"><input class="field" id="dr" value="'+esc(S.draft)+
+         '" maxlength="220" placeholder="Say it with your chest" aria-label="Your message">'+
+         '<button class="send" id="sd"'+(S.draft.trim()&&!S.posting?'':' disabled')+'>'+
+         (S.posting?'…':'Send')+'</button></div>';
+      h+='<div class="count" id="ct">Posting as '+esc(S.claim)+' · '+(220-S.draft.length)+' left</div>';
+    }else{
+      h+='<p class="qhint" style="margin-top:14px">Answer the three questions first, then you get the mic.</p>';
+    }
+    h+='</div>';
+  }
+
+  h+='<button class="primary" data-act="toform">'+(S.claim?'Change my answers':'Add my answers')+'</button>';
+  h+='<button class="ghost" data-act="refresh">Refresh</button>';
+  return h;
+}
+
+/* ============================================================
+   7. RENDER
+   ============================================================ */
+function render(){
+  var hd=document.getElementById('hd'), sub=document.getElementById('hdsub'), app=document.getElementById('app');
+  if(S.loading){ hd.innerHTML='Hang<br>on'; sub.textContent='Loading the board…'; app.innerHTML=''; return; }
+  if(S.view==='form'){
+    hd.innerHTML='Are you<br>in?';
+    sub.textContent='Three questions, about thirty seconds. Kickoff is September 9, so the draft lands before then.';
+    app.innerHTML=viewForm();
+  }else{
+    hd.innerHTML='Where we<br>stand';
+    sub.textContent = ins().length + ' in' + (outs().length ? ', '+outs().length+' out' : '') + '. Everyone sees this same page.';
+    app.innerHTML=viewBoard();
+  }
+  var nm=document.getElementById('nm'); if(nm && document.activeElement!==nm) nm.value=S.name;
+}
+
+/* Text inputs update state without re-rendering, so focus is never lost. */
+document.addEventListener('input', function(e){
+  if(e.target.id==='nm'){
+    S.name=e.target.value;
+    var go=document.getElementById('go'); if(go) go.disabled=!canSubmit()||S.saving;
+  }
+  if(e.target.id==='dr'){
+    S.draft=e.target.value;
+    var sd=document.getElementById('sd'); if(sd) sd.disabled=!S.draft.trim()||S.posting;
+    var ct=document.getElementById('ct'); if(ct) ct.textContent='Posting as '+S.claim+' · '+(220-S.draft.length)+' left';
+  }
+});
+document.addEventListener('keydown', function(e){
+  if(e.key==='Enter' && e.target.id==='dr' && !S.posting) post();
+  if(e.key==='Enter' && e.target.id==='nm' && canSubmit()) submit();
+});
+document.addEventListener('click', function(e){
+  var b=e.target.closest('button'); if(!b) return;
+  if(b.id==='go') return submit();
+  if(b.id==='sd') return post();
+  var a=b.getAttribute('data-act'), v=b.getAttribute('data-v');
+  if(a==='status'){ S.status=v; render(); }
+  if(a==='buy'){ S.buyIn=v; render(); }
+  if(a==='slot'){ var i=S.slots.indexOf(v); i>-1?S.slots.splice(i,1):S.slots.push(v); render(); }
+  if(a==='peek'){ S.openCell = S.openCell===v ? null : v; render(); }
+  if(a==='tab'){ S.tab=v; S.err=''; render(); }
+  if(a==='toboard'){ S.view='board'; S.err=''; pull().then(render); render(); }
+  if(a==='toform'){ S.view='form'; S.openCell=null; S.err=''; render(); }
+  if(a==='refresh'){ pull().then(render); }
+  if(a==='kill'){ kill(v); }
+  if(a==='release'){ release(); }
+});
+
+boot();
+</script>
+</body>
+</html>
